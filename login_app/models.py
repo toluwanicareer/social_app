@@ -13,6 +13,10 @@ class Profile(models.Model):
 	user=models.OneToOneField(User)
 	
 
+class Group(models.Model):
+	company_name=models.CharField(max_length=200)
+
+
 
 class Account(models.Model):
 	user=models.ForeignKey(User)
@@ -23,6 +27,10 @@ class Account(models.Model):
 	other_info=models.CharField(max_length=200, null=True, blank=True)
 	access_token_secret=models.CharField(max_length=200, null=True, blank=True)
 	oauth_id=models.CharField(max_length=200, null=True)
+	group=models.ForeignKey(Group, null=True, blank=True)
+
+	def __str__(self):
+		return self.account_name + ' ' + self.account_type
 
 
 
@@ -38,6 +46,7 @@ class Post(models.Model):
 class PostImage(models.Model):
 	image=models.ImageField()
 	post=models.ForeignKey(Post)
+
 
 
 

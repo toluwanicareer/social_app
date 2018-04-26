@@ -1,0 +1,25 @@
+
+<link href="styles.imageuploader.css" rel="stylesheet">
+<div class="uploader__box js-uploader__box l-center-box">
+  <form action="your/nonjs/fallback/" method="POST">
+  	<div class="uploader__box js-uploader__box l-center-box">
+      <div class="uploader__contents">
+          <label class="button button--secondary" for="fileinput">Select Files</label>
+          <input id="fileinput" class="uploader__file-input" type="file" multiple value="Select Files">
+      </div>
+     </div>
+      <input class="button button--big-bottom" type="submit" value="Upload Selected Files">
+  </form>
+</div>
+                <form action="/file-upload"
+      class="dropzone"
+      id="my-awesome-dropzone sign-box"></form>
+
+      <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="jquery.imageuploader.js"></script>
+<script type="text/javascript">
+(function(){
+            var options = {};
+            $('.js-uploader__box').uploader(options);
+        }());
+</script>

@@ -21,6 +21,7 @@
         <!--template custom css file-->
         <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
 
+        <link href="{% static 'styles.imageuploader.css' %}" rel="stylesheet">
         <script src="{% static 'assets/js/modernizr.js' %}"></script>
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -31,6 +32,13 @@
     </head>
     <body>
 
+        <style>
+        .uploader__submit-button{
+            display:none;
+        }
+
+    </style>
+
         <div class="page-center">
             <div class="page-center-in">
 
@@ -38,20 +46,27 @@
                     <div class="sign-avatar">
                         <img src="assets/images/avtar.png" alt="" class="img-circle">
                     </div>
-                    <header class="sign-title">Sign In</header>
-                     {% if messages %}
+                    {% if user.is_authenticated %}
+                        <p>Welcome {{ user.username }} !!!</p> 
+                        <a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-warning">Connect Twitter</a>   
+                        <br>
+                        <br>
+                        <a href="/logout/" class="btn btn-success">Logout</a>
+                        
+                   {% else %}
+                    {% if messages %}
         {% for message in messages %}
         <div class="alert alert-{{message.tags}} alert-dismissable">
           <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
           <strong>{{message}}</strong>
         </div>
+
         {%endfor%}
         {% endif %}
-                    {% if user.is_authenticated %}
-                        <p>Welcome {{ user.username }} !!!</p> 
-                        <a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-primary">Connect Twitter</a>    
-                    {% endif %}
-                     {% if not  user.is_authenticated %}
+                    <header class="sign-title">Sign In</header>
+                    
+                    
+                     
                     <a href="#" onclick="TwLogin_or_add_account('/twitter_login/')">Twitter Login</a>
                     <div class="form-group">
                         <input type="text" class="form-control" placeholder="E-Mail or Phone">
@@ -73,6 +88,21 @@
                     <p>Don't have an account? <a href="page-register.html">Sign up</a></p>
                      {% endif %}
                 </form>
+<hr>
+ {% if user.is_authenticated %}
+                <form class="sign-box" id="content" method="post" enctype="multipart/formdata">
+                    {% csrf_token %}
+                        {{postform}}
+
+                        <div class="uploader__box js-uploader__box l-center-box">
+      <div class="uploader__contents">
+          <label class="button button--secondary" for="fileinput">Select Files</label>
+          <input id="fileinput" name="image" class="uploader__file-input" type="file" multiple value="Select Files">
+      </div>
+     </div>
+                     <button class="btn btn-primary" type="Submit">Submit</button><!-- TODO, change text based on select method of publishing -->
+                </form>
+{% endif %}
             </div><!--page center in-->
         </div><!--page center-->
 
@@ -83,13 +113,28 @@
         <script src="{% static 'assets/plugins/pace/pace.min.js' %}"></script>
         <script src="{% static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
         <script src="{% static 'assets/js/app.js' %}"></script>
+        <script src=" {% static 'jquery.imageuploader.js' %}"></script>
+
          <!-- iCheck -->
     <script src="assets/plugins/iCheck/icheck.min.html' %}"></script>
     <script>
         $(document).ready(function(){
-            
-            
+           
+
         });
+         var options = {
+             ajaxUrl: '/',
+
+         };
+            $('.js-uploader__box').uploader(options);
+
+             $('#content').submit(function(e){
+                  // avoid to execute the actual submit of the form.
+                 console.log()
+                uploadSubmitHandler($(this));
+                e.preventDefault();
+                
+            })
 
         function TwLogin_or_add_account(url){
                 $.get(url, function(){
@@ -105,6 +150,8 @@
 
                 return false;
             }
+
+
     </script>
     </body>
 

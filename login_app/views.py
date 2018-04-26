@@ -17,15 +17,38 @@ from django.core.urlresolvers import reverse
 import pdb
 from django.contrib.auth.models import User
 from .models import Profile, Account
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import Q
 from django.contrib import messages
 # Create your views here.
+from .forms import PostForm, ImagePostForm
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
-class LoginView(TemplateView):
+class LoginView(View):
 	template_name='page-login.html'
+
+	@method_decorator(csrf_exempt)
+	def dispatch(self, request, *args, **kwargs):
+		return super(LoginView, self).dispatch(request, *args, **kwargs)
+
+	def get(self, request, *args, **kwargs):
+		postform=PostForm()
+		imageform=ImagePostForm()
+		#pdb.set_trace()
+
+		return render(request,  self.template_name, {'postform':postform, 'imageform':imageform})
+
+	def post(self,request, *args, **kwargs):
+		pdb.set_trace()
+		if request.is_ajax():
+			
+			files=request.FILES.getlist('files[]')
+			#for file in files:
+
+		return HttpResponseRedirect(reverse('twitter:home'))
 
 
 class loginTwitter(View):
@@ -33,6 +56,7 @@ class loginTwitter(View):
 		
 
 		if request.GET.get('oauth_verifier'):
+			
 			verifier= request.GET.get('oauth_verifier')
 			auth=get_tweet_auth(request,verifier)
 			api = tweepy.API(auth)
@@ -51,6 +75,7 @@ class loginTwitter(View):
 					)
 			if user is not None:
 				login(request, user)
+
 			return HttpResponseRedirect(reverse('twitter:home'))
 
 		'''
@@ -84,6 +109,11 @@ class add_twitter_account(View):
 
 		
 
+class Logout(View):
+
+	def get(self, request, *args, **kwargs):
+		logout(request)
+		return HttpResponseRedirect(reverse('twitter:home'))
 
 
 
@@ -138,7 +168,7 @@ def update_or_create_account(oauth_id, **kwargs):
 
 
 
-def get_request_token(request,callback_url='http://localhost:8000/'):
+def get_request_token(request,callback_url='http://localhost:8000/twitter_login'):
 	context=dict()
 	auth = tweepy.OAuthHandler(settings.TWITTER_KEY, settings.TWITTER_SECRET, callback_url)
 	try:
