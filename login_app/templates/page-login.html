@@ -46,14 +46,6 @@
                     <div class="sign-avatar">
                         <img src="assets/images/avtar.png" alt="" class="img-circle">
                     </div>
-                    {% if user.is_authenticated %}
-                        <p>Welcome {{ user.username }} !!!</p> 
-                        <a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-warning">Connect Twitter</a>   
-                        <br>
-                        <br>
-                        <a href="/logout/" class="btn btn-success">Logout</a>
-                        
-                   {% else %}
                     {% if messages %}
         {% for message in messages %}
         <div class="alert alert-{{message.tags}} alert-dismissable">
@@ -63,6 +55,16 @@
 
         {%endfor%}
         {% endif %}
+                    {% if user.is_authenticated %}
+                        <p>Welcome {{ user.username }} !!!</p> 
+                        <a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-warning">Connect Twitter</a>   
+                        <br>
+                        <br>
+                        <a href="/logout/" class="btn btn-success">Logout</a>
+
+                        
+                   {% else %}
+                    
                     <header class="sign-title">Sign In</header>
                     
                     
@@ -120,8 +122,21 @@
     <script>
         $(document).ready(function(){
            
+           $('#id_scheduling_type').on('change', function(e){
+                let val=$(this).val();
+                let timeslot=$('#id_time_slot');
+                if (val == 'Schedule Manually'){
+                    timeslot.removeClass('hidden');
+                }
+                else{
+                    if (!timeslot.hasClass('hidden')){
+                        timeslot.addClass('hidden');
+                    }
+                }
 
-        });
+           })
+})
+       
          var options = {
              ajaxUrl: '/',
              form_id:'#content'

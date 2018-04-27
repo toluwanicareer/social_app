@@ -16,7 +16,7 @@ from django.http import  HttpResponseRedirect
 from django.core.urlresolvers import reverse
 import pdb
 from django.contrib.auth.models import User
-from .models import Profile, Account
+from .models import Profile, Account, PostImage
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import Q
@@ -26,6 +26,7 @@ from .forms import PostForm, ImagePostForm
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from .core import get_request_token,get_tweet_auth
 
 
 class LoginView(View):
@@ -45,31 +46,41 @@ class LoginView(View):
 	def post(self,request, *args, **kwargs):
 		
 		
-		#pdb.set_trace()
+		
 		
 		#upload then post
 		#assign timeline
-		postform=PostForm(request.POST)
-		if postform.is_valid():
+		if request.is_ajax():
+			postform=PostForm(request.POST)
+			if postform.is_valid():
 
-			post=postform.save(commit=False)
-			now = timezone.now()
-			post.set_time_slot()
-			post.set_user_status(request)
-			post.save()
+				post=postform.save(commit=False)
+				now = timezone.now()
+				post.set_time_slot()
+				post.set_user_status(request)
+				# Save the new instance.
+				post.save()
+				# Now, save the many-to-many data for the form.
 
-			files=request.FILES.getlist('files[]')
-		
-			for file in files:
-				PostImage(post=post, image=file).save()
+				postform.save_m2m()
 
-			messages.success(request, 'POst Saved' )	
+				files=request.FILES.getlist('files[]')
+				
+				for file in files:
+					PostImage(post=post, image=file).save()
 
+				messages.success(request, 'Post Saved' )	
 
-		else:
+				#check scheduling type to know whether to publish now
+				if post.scheduling_type=='Post Now':
+					post.publish_post()
+				messages.success(request, 'Post Publisehd in account specified')
 
-			messages.warning(request, form.errors)
+			else:
 
+				messages.warning(request, postform.errors)
+
+			return JsonResponse({'status':True, 'url':reverse('twitter:home')})
 
 
 
@@ -195,30 +206,3 @@ def update_or_create_account(oauth_id, **kwargs):
 
 
 
-def get_request_token(request,callback_url='http://localhost:8000/twitter_login'):
-	context=dict()
-	auth = tweepy.OAuthHandler(settings.TWITTER_KEY, settings.TWITTER_SECRET, callback_url)
-	try:
-		redirect_url = auth.get_authorization_url()
-		request.session['request_token']=auth.request_token
-		context['redirect']=True
-		context['redirect_url']=redirect_url
-		return JsonResponse(context)
-	except tweepy.TweepError:
-		#TODO handle twitter error
-		pass
-
-
-
-
-def get_tweet_auth(request,verifier):
-	auth=tweepy.OAuthHandler(settings.TWITTER_KEY, settings.TWITTER_SECRET)
-	token=request.session['request_token']
-	auth.request_token=token
-	try:
-		auth.get_access_token(verifier)
-	except tweepy.TweepError:
-		#TODO handle approval error
-		pass
-	auth.set_access_token(auth.access_token, auth.access_token_secret)
-	return auth

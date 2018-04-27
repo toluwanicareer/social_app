@@ -8,7 +8,11 @@ from django import forms
 class PostForm(ModelForm):
 	class Meta:
 		model=Post
-		fields =('content', 'account', 'scheduling_type')
+		fields =('content', 'account', 'scheduling_type', 'time_slot')
+
+		widgets={
+		'time_slot':forms.DateTimeInput(attrs={'class':'hidden'}),
+		}
 
 		def __init__(self,  *args, **kwargs):
 			super(PostForm, self).__init__(*args, **kwargs)
