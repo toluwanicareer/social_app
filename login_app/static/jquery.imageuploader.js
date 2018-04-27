@@ -15,21 +15,24 @@
                 fileTypeWhiteList: ['jpg', 'png', 'jpeg', 'gif', 'pdf'],
                 badFileTypeMessage: 'Sorry, we\'re unable to accept this type of file.',
                 ajaxUrl: '/ajax/upload',
-                testMode: false
+                testMode: false,
+                form_id:'#content',
+                max_image:1000,
             }, options);
 
             var state = {
                 fileBatch: [],
                 isUploading: false,
                 isOverLimit: false,
-                listIndex: 0
+                listIndex: 0,
+                
             };
 
-            // create DOM elements
+            // create DOM elements   submitButton: $('<button class="js-uploader__submit-button uploader__submit-button  uploader__hide">' +
+                    //options.submitButtonCopy + '<i class="js-uploader__icon fa fa-upload uploader__icon"></i></button>'),
             var dom = {
                 uploaderBox: $(this),
-                submitButton: $('<button class="js-uploader__submit-button uploader__submit-button uploader__hide">' +
-                    options.submitButtonCopy + '<i class="js-uploader__icon fa fa-upload uploader__icon"></i></button>'),
+                submitButton: $('<button class="js-uploader__submit-button uploader__submit-button" >Submit</button>'),
                 instructions: $('<p class="js-uploader__instructions uploader__instructions">' +
                     options.instructionsCopy + '</p>'),
                 selectButton: $('<input style="height: 0; width: 0;" id="fileinput' + index + '" type="file" multiple class="js-uploader__file-input uploader__file-input">' +
@@ -41,7 +44,8 @@
                     options.secondarySelectButtonCopy + '</label>'),
                 fileList: $('<ul class="js-uploader__file-list uploader__file-list"></ul>'),
                 contentsContainer: $('<div class="js-uploader__contents uploader__contents"></div>'),
-                furtherInstructions: $('<p class="js-uploader__further-instructions uploader__further-instructions uploader__hide">' + options.furtherInstructionsCopy + '</p>')
+                furtherInstructions: $('<p class="js-uploader__further-instructions uploader__further-instructions uploader__hide">' + options.furtherInstructionsCopy + '</p>'),
+
             };
 
             // empty out whatever is in there
@@ -81,7 +85,8 @@
                 dom.secondarySelectButton.on('change', selectFilesHandler);
 
                 // handle the submit click
-                dom.submitButton.on('click', uploadSubmitHandler);
+                //dom.submitButton.on('click', uploadSubmitHandler);
+                $(options.form_id).on('submit',uploadSubmitHandler);
 
                 // remove link handler
                 dom.uploaderBox.on('click', '.js-upload-remove-button', removeItemHandler);
@@ -178,9 +183,12 @@
             }
          
             function uploadSubmitHandler () {
+                form=$(options.form_id)
+                console.log(form)
                 if (state.fileBatch.length !== 0) {
-                    var data = new FormData();
+                    var data = new FormData(form);
                     for (var i = 0; i < state.fileBatch.length; i++) {
+                        console.log(state.fileBatch[i].fileName)
                         data.append('files[]', state.fileBatch[i].file, state.fileBatch[i].fileName);
                     }
                     $.ajax({

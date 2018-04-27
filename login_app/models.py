@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 
 # Create your models here.
 
@@ -42,6 +43,16 @@ class Post(models.Model):
 		(settings.APPNAME+' Scheduling',settings.APPNAME+' Scheduling'),('Post Now','Post Now')))
 	time_slot=models.DateTimeField()
 	status=models.CharField(max_length=200)
+
+	def set_time_slot(self):
+		#TODO work on this to support other scheduling method
+		self.time_slot=timezone.now()
+
+	def set_user_status(self, request):
+		self.user=request.user
+		self.status='Queing'
+
+		
 
 class PostImage(models.Model):
 	image=models.ImageField()

@@ -33,8 +33,8 @@
     <body>
 
         <style>
-        .uploader__submit-button{
-            display:none;
+        .crazy{
+            display:block;
         }
 
     </style>
@@ -100,7 +100,7 @@
           <input id="fileinput" name="image" class="uploader__file-input" type="file" multiple value="Select Files">
       </div>
      </div>
-                     <button class="btn btn-primary" type="Submit">Submit</button><!-- TODO, change text based on select method of publishing -->
+                     <!-- TODO, change text based on select method of publishing -->
                 </form>
 {% endif %}
             </div><!--page center in-->
@@ -124,17 +124,13 @@
         });
          var options = {
              ajaxUrl: '/',
+             form_id:'#content'
 
          };
-            $('.js-uploader__box').uploader(options);
+           $('.js-uploader__box').uploader(options);
+            
 
-             $('#content').submit(function(e){
-                  // avoid to execute the actual submit of the form.
-                 console.log()
-                uploadSubmitHandler($(this));
-                e.preventDefault();
-                
-            })
+            
 
         function TwLogin_or_add_account(url){
                 $.get(url, function(){

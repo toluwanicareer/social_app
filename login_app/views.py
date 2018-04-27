@@ -25,6 +25,7 @@ from django.contrib import messages
 from .forms import PostForm, ImagePostForm
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 
 
 class LoginView(View):
@@ -42,11 +43,37 @@ class LoginView(View):
 		return render(request,  self.template_name, {'postform':postform, 'imageform':imageform})
 
 	def post(self,request, *args, **kwargs):
-		pdb.set_trace()
-		if request.is_ajax():
-			
+		
+		
+		#pdb.set_trace()
+		
+		#upload then post
+		#assign timeline
+		postform=PostForm(request.POST)
+		if postform.is_valid():
+
+			post=postform.save(commit=False)
+			now = timezone.now()
+			post.set_time_slot()
+			post.set_user_status(request)
+			post.save()
+
 			files=request.FILES.getlist('files[]')
-			#for file in files:
+		
+			for file in files:
+				PostImage(post=post, image=file).save()
+
+			messages.success(request, 'POst Saved' )	
+
+
+		else:
+
+			messages.warning(request, form.errors)
+
+
+
+
+		#for file in files:
 
 		return HttpResponseRedirect(reverse('twitter:home'))
 
