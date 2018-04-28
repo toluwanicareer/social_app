@@ -1,5 +1,5 @@
 /*
- * ©2016 Quicken Loans Inc. All rights reserved.
+ * Â©2016 Quicken Loans Inc. All rights reserved.
  */
 /* global jQuery FormData FileReader */
 (function ($) {
@@ -182,24 +182,42 @@
                 return name.replace(/[^a-zA-Z0-9.\-]/gi, ''); // Strip any special characters
             }
          
-            function uploadSubmitHandler () {
+            function uploadSubmitHandler (e) {
                 form=$(options.form_id)
-                console.log(form)
+                var data = new FormData(form[0]);
+
+                for (var pair of data.entries())
+                        {
+                         console.log(pair[0]+ ', '+ pair[1]); 
+                        }
+
                 if (state.fileBatch.length !== 0) {
-                    var data = new FormData(form);
+                   
                     for (var i = 0; i < state.fileBatch.length; i++) {
-                        console.log(state.fileBatch[i].fileName)
+                        console.log('counting ...');
                         data.append('files[]', state.fileBatch[i].file, state.fileBatch[i].fileName);
                     }
+
+                }
+
+                    
+
+
                     $.ajax({
                         type: 'POST',
                         url: options.ajaxUrl,
                         data: data,
                         cache: false,
                         contentType: false,
-                        processData: false
-                    });
-                }
+                        processData: false,
+
+                    }).done(function(data){
+                        window.location=data.url;
+                    })
+
+                e.preventDefault();
+                e.stopPropagation();
+                
             }
             
 
