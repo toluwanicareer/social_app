@@ -37,7 +37,7 @@ class LoginView(View):
 		return super(LoginView, self).dispatch(request, *args, **kwargs)
 
 	def get(self, request, *args, **kwargs):
-		postform=PostForm()
+		postform=PostForm(request.user)
 		#imageform=ImagePostForm()
 		publishtimeform=PublishTimeForm()
 
