@@ -37,19 +37,21 @@ class LoginView(View):
 		return super(LoginView, self).dispatch(request, *args, **kwargs)
 
 	def get(self, request, *args, **kwargs):
-		postform=PostForm(request.user)
-		#imageform=ImagePostForm()
-		publishtimeform=PublishTimeForm()
+		context=dict()
+		if request.user.is_authenticated():
+			postform=PostForm(request.user)
+			#imageform=ImagePostForm()
+			publishtimeform=PublishTimeForm()
+			context={'postform':postform,'ptform':PublishTimeForm }
+		
 
-		#pdb.set_trace()
-
-		return render(request,  self.template_name, {'postform':postform,'ptform':PublishTimeForm })
+		return render(request,  self.template_name, context)
 
 	def post(self,request, *args, **kwargs):
 		#upload then post
 		#assign timeline
 		if request.is_ajax():
-			postform=PostForm(request.POST)
+			postform=PostForm(request.user, data=request.POST)
 
 			if postform.is_valid():
 
