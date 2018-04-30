@@ -16,13 +16,13 @@ from django.http import  HttpResponseRedirect
 from django.core.urlresolvers import reverse
 import pdb
 from django.contrib.auth.models import User
-from .models import Profile, Account, PostImage, Token, AccountType
+from .models import Profile, Account, PostImage
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import Q
 from django.contrib import messages
 # Create your views here.
-from .forms import PostForm, ImagePostForm, PublishTimeForm
+from .forms import PostForm, ImagePostForm
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.utils import timezone
@@ -38,12 +38,10 @@ class LoginView(View):
 
 	def get(self, request, *args, **kwargs):
 		postform=PostForm()
-		#imageform=ImagePostForm()
-		publishtimeform=PublishTimeForm()
-
+		imageform=ImagePostForm()
 		#pdb.set_trace()
 
-		return render(request,  self.template_name, {'postform':postform,'ptform':PublishTimeForm })
+		return render(request,  self.template_name, {'postform':postform, 'imageform':imageform})
 
 	def post(self,request, *args, **kwargs):
 		
@@ -54,28 +52,17 @@ class LoginView(View):
 		#assign timeline
 		if request.is_ajax():
 			postform=PostForm(request.POST)
-
 			if postform.is_valid():
 
 				post=postform.save(commit=False)
 				now = timezone.now()
+				post.set_time_slot()
 				post.set_user_status(request)
-				post.save(postform)
-				if post.scheduling_type=='Schedule Manually':
-					ptform=PublishTimeForm(request.POST)
-					if ptform.is_valid():
-						
-						accounts=post.account.all()
-						for account in accounts:
-							ptobject=ptform.save(commit=False)
-							ptobject.account=account
-							ptobject.post=post
-							ptobject.save()
-					else:
-						post.delete()
-						messages.warning(request, ptform.errors)
-						return JsonResponse({'status':True, 'url':reverse('twitter:home')})
+				# Save the new instance.
+				post.save()
+				# Now, save the many-to-many data for the form.
 
+				postform.save_m2m()
 
 				files=request.FILES.getlist('files[]')
 				
@@ -86,12 +73,9 @@ class LoginView(View):
 
 				#check scheduling type to know whether to publish now
 				if post.scheduling_type=='Post Now':
-					try:
-						post.publish_for_all_account()
-						messages.success(request, 'Post Publisehd in accounts specified')
-					except:
-						messages.warning(request,'Network error could not make post now, so it has been scedules')
-						post.schedule_post()
+					post.publish_post()
+				messages.success(request, 'Post Publisehd in account specified')
+
 			else:
 
 				messages.warning(request, postform.errors)
@@ -123,16 +107,10 @@ class loginTwitter(View):
 				user=User.objects.create(username='TW__'+tw_user.screen_name, is_active=True)
 				user.save()
 				Profile.objects.create(auth_method='twitter', user=user, oauth_user_id=tw_user.id).save()
-				
-				'''
+				user=User.objects.get(id=user.id)
 				Account.objects.create(user=user,access_token=auth.access_token, access_token_secret=auth.access_token_secret, 
 					account_name=tw_user.screen_name,account_type='twitter', thumbnail=tw_user.profile_image_url, oauth_id=tw_user.id
 					)
-
-				'''
-				update_or_create_account(tw_user.id, access_token=auth.access_token,
-					secret=auth.access_token_secret , request=request, 
-					tw_user=tw_user, account_type='twitter', user=user)	
 			if user is not None:
 				login(request, user)
 
@@ -159,9 +137,7 @@ class add_twitter_account(View):
 			auth=get_tweet_auth(request,verifier)
 			api = tweepy.API(auth)
 			tw_user=api.me()
-			exist=update_or_create_account(tw_user.id, access_token=auth.access_token,
-				secret=auth.access_token_secret , request=request, 
-				tw_user=tw_user, account_type='twitter', user=request.user)
+			exist=update_or_create_account(tw_user.id, access_token=auth.access_token,secret=auth.access_token_secret , request=request, tw_user=tw_user)
 			if not exist :
 				messages.warning(request, 'Account creation not successful')
 			else:
@@ -204,25 +180,9 @@ def update_or_create_account(oauth_id, **kwargs):
 		
 		user=request.user
 		tw_user=kwargs['tw_user']
-		try:
-			account_type=AccountType.objects.get(name__icontains=kwargs['account_type'])
-		except AccountType.DoesNotExist:
-			#TODO
-			#Handle error for invalid account creation
-			return False
-		token_info=Token(access_token=kwargs['access_token'],
-			oauth_id=oauth_id,access_token_secret=kwargs['secret'])
-		token_info.save()
-				
-		account=Account(user=kwargs['user'], 
-					account_name=tw_user.screen_name,
-					account_type=account_type,
-					 thumbnail=tw_user.profile_image_url, 
-					 oauth_id=oauth_id,
-					 access_token_info=token_info
+		Account.objects.create(user=user,access_token=kwargs['access_token'], access_token_secret=kwargs['secret'], 
+					account_name=tw_user.screen_name,account_type='twitter', thumbnail=tw_user.profile_image_url, oauth_id=tw_user.id
 					)
-		account.save()
-		
 		return True
 
 	except MultipleObjectsReturned:
