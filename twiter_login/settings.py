@@ -133,3 +133,9 @@ USE_TZ = True
 
 TIMESLOT_HRS=[9,12]
 TIMESLOT_DAYS=['Monday','Wednesday', 'Friday']
+
+AFTER_LOGIN_URL='login:home'
+SITE_NAME='http://localhost:8000'# change this in production
+TWITTER_LOGIN_URL=SITE_NAME+'/twitter/twitter_login' 
+TWITTER_ADD_ACCOUNT_URL=SITE_NAME+'/twitter/add_account'
+TWITTER_ACCOUNT_NAME='twitter'

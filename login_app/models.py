@@ -57,9 +57,13 @@ class Account(models.Model):
 		'''
 		
 		if not self.id:
-			super().save(*args, **kwargs)
+			'''
+			compatible with only python27
+			'''
+			super(Account, self).save(*args, **kwargs)
 			self.generate_time_slot()	
-		super().save(*args, **kwargs)	
+			return True
+		super(Account, self).save(*args, **kwargs)	
 		
 
 	def generate_time_slot(self,days=settings.TIMESLOT_DAYS , hrs=settings.TIMESLOT_HRS):
@@ -137,20 +141,15 @@ class Post(models.Model):
 			#create the pt object
 			pt=PublishingTime.objects.create(post=self,account=account_object,datetime=publish_date,timeslot=next_slot)
 			pt.save()
-				
-			
-				
-	
-
-
-	def save(self,form, *args, **kwargs):
+	def save(self,form=None, *args, **kwargs):
 		'''
 		create publishing time for each account
 		by calling @add_pt method for each account
 		'''
 		if not self.id: # check if post object already exist
-			super().save(*args, **kwargs)  # Call the "real" save() method.
-			form.save_m2m() 		
+			super(Post, self).save(*args, **kwargs)  # Call the "real" save() method.
+			if form:
+				form.save_m2m() 		
 			if self.scheduling_type==settings.APPNAME+' Queue':
 				self.schedule_post()
 
@@ -264,25 +263,7 @@ class PublishingTime(models.Model):
 			pt.save()
 			ptdate=current_date
 		self.timeslot.next_available_day=ptdate	
-			
-
-		super().delete(*args, **kwargs) 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		super(self,PublishingTime).delete(*args, **kwargs)
 
 
 
