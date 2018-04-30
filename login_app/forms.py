@@ -1,6 +1,6 @@
 from django.forms.models import ModelForm
 from django.forms.widgets import CheckboxSelectMultiple
-from .models import Post, PostImage
+from .models import Post, PostImage, PublishingTime
 from django import forms
 
 
@@ -8,12 +8,12 @@ from django import forms
 class PostForm(ModelForm):
 	class Meta:
 		model=Post
-		fields =('content', 'account', 'scheduling_type', 'time_slot')
-
+		fields =('content', 'account', 'scheduling_type' )
+		'''  
 		widgets={
 		'time_slot':forms.DateTimeInput(attrs={'class':'hidden'}),
 		}
-
+		''' 
 		def __init__(self,  *args, **kwargs):
 			super(PostForm, self).__init__(*args, **kwargs)
 			self.fields['account'].widget=CheckboxSelectMultiple()
@@ -32,3 +32,12 @@ class ImagePostForm(ModelForm):
 		widget={
 		'image':forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
 		}
+
+class PublishTimeForm(ModelForm):
+	class Meta:
+		
+		model=PublishingTime
+		fields=('datetime',)    
+		widgets={
+			'datetime':forms.DateTimeInput(attrs={'class':'hidden'}),
+			}

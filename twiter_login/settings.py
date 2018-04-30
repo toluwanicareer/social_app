@@ -106,13 +106,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+#TIME_ZONE = 'UTC+1'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+#USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -129,3 +129,6 @@ APPNAME='KemiBox'
 TIME_ZONE='Africa/Lagos'
 
 USE_TZ = True
+
+TIMESLOT_HRS=[9,12]
+TIMESLOT_DAYS=['Monday','Wednesday', 'Friday']

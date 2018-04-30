@@ -60,6 +60,10 @@
                         <a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-warning">Connect Twitter</a>   
                         <br>
                         <br>
+                        <a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-warning">Connect Facebook Profile</a>  
+                         <!--<a href="#" onclick="TwLogin_or_add_account('/add_account/')"" class="btn btn-warning">Connect Facebook Page</a>  --> 
+                        <br>
+                        <br>
                         <a href="/logout/" class="btn btn-success">Logout</a>
 
                         
@@ -95,7 +99,7 @@
                 <form class="sign-box" id="content" method="post" enctype="multipart/formdata">
                     {% csrf_token %}
                         {{postform}}
-
+                        {{ptform}} 
                         <div class="uploader__box js-uploader__box l-center-box">
       <div class="uploader__contents">
           <label class="button button--secondary" for="fileinput">Select Files</label>
@@ -124,7 +128,7 @@
            
            $('#id_scheduling_type').on('change', function(e){
                 let val=$(this).val();
-                let timeslot=$('#id_time_slot');
+                let timeslot=$('#id_datetime');
                 if (val == 'Schedule Manually'){
                     timeslot.removeClass('hidden');
                 }

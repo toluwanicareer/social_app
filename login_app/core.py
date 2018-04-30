@@ -1,7 +1,8 @@
 import tweepy
 from django.conf import settings
 from django.http import JsonResponse
-
+from django.utils import timezone
+import datetime
 
 def update_status(post_object, account_object):
 	files=[item.image.file for item in post_object.postimage_set.all()]
@@ -16,7 +17,7 @@ def update_status(post_object, account_object):
 
 def get_tweet_api(account_object):
 	auth=tweepy.OAuthHandler(settings.TWITTER_KEY, settings.TWITTER_SECRET)
-	auth.set_access_token(account_object.access_token, account_object.access_token_secret)
+	auth.set_access_token(account_object.token.access_token, account_object.token.access_token_secret)
 	return tweepy.API(auth)
 
 
@@ -49,3 +50,23 @@ def get_tweet_auth(request,verifier):
 		pass
 	auth.set_access_token(auth.access_token, auth.access_token_secret)
 	return auth
+
+
+
+
+
+
+def get_day_no_from_today():
+	'''
+	return the weekday
+	@return: weekday number
+	''' 
+	today=timezone.now()
+	return today.weekday()
+
+
+def next_weekday(d, weekday):
+    days_ahead = weekday - d.weekday()
+    if days_ahead <= 0: # Target day already happened this week
+        days_ahead += 7
+    return d + datetime.timedelta(days_ahead)
